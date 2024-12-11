@@ -20,3 +20,4 @@
 /Users/tamer/RiderProjects/MultiplayerGame/MultiplayerGame/obj/Debug/net6.0/MultiplayerGame.pdb
 /Users/tamer/RiderProjects/MultiplayerGame/MultiplayerGame/obj/Debug/net6.0/MultiplayerGame.genruntimeconfig.cache
 /Users/tamer/RiderProjects/MultiplayerGame/MultiplayerGame/obj/Debug/net6.0/ref/MultiplayerGame.dll
+/Users/tamer/RiderProjects/MultiplayerGame/MultiplayerGame/bin/Debug/net6.0/Newtonsoft.Json.dll

@@ -5,7 +5,7 @@ using MultiplayerGame;
 
 class Program
 {
-    static void Main()
+    static async Task Main()
     {
         Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
@@ -17,23 +17,20 @@ class Program
 
         Player player = new Player(new Position(200,200));
 
-        WebSocketClient playerWebSocket = new WebSocketClient();
+        
         float t = 0;
         while (!Raylib.WindowShouldClose())
         {
             Position.ReDoPositions();
+            OtherPlayers.HandlePlayers();
+            
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.Blue);
             player.HandlePlayer();
+            _ = player.GetData();
             
             Raylib.DrawRectangle((int)boxPos.ScreenPosition.X,(int)boxPos.ScreenPosition.Y,100,100,Color.Brown);
-
-            t += Raylib.GetFrameTime();
-            if (t > 1)
-            {
-                t = 0;
-                playerWebSocket.sendMessage("Position: " + player.Position.WorldPosition.X + "," + player.Position.WorldPosition.Y);
-            }
+            
             
             
             Raylib.EndDrawing();
