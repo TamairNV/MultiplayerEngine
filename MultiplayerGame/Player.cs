@@ -3,7 +3,7 @@ using Raylib_cs;
 using System.Numerics;
 using MultiplayerGame;
 using Newtonsoft.Json;
-
+using System;
 
 public class Player
 {
@@ -64,17 +64,23 @@ public class Player
         }
     }
 
-    public async Task GetData()
+    public async Task GetData(int i)
     {
-        PlayerData data = new PlayerData()
+        if (i % 3 == 0)
         {
-            X = Position.WorldPosition.X,
-            Y = Position.WorldPosition.Y,
-            ID = "0"
-        };
-        await PlayerWebSocket.sendMessage(JsonConvert.SerializeObject(data));
+            PlayerData data = new PlayerData()
+            {
+                X = Position.WorldPosition.X,
+                Y = Position.WorldPosition.Y,
+                ID = "0"
+            };
+            await PlayerWebSocket.sendMessage(JsonConvert.SerializeObject(data));
+
+        }
+
         
         await PlayerWebSocket.ReceiveDataAsync();
+        
         
         if (PlayerWebSocket.LastMessageReceived != null)
         {
@@ -87,7 +93,9 @@ public class Player
                 {
                     if (player.ID == deserializedData.ID)
                     {
-                        player.Position.WorldPosition = new Vector2((int)deserializedData.X, (int)deserializedData.Y);
+                        //player.LastTargetPosition = new Vector2(player.TargetPosition.X, player.TargetPosition.Y);
+                        //player.Position.WorldPosition = player.LastTargetPosition;
+                        player.TargetPosition = new Vector2((int)deserializedData.X, (int)deserializedData.Y);
                         return;
                     }
                 }
@@ -138,21 +146,51 @@ public struct PlayerData
 public class OtherPlayers
 {
     public static List<OtherPlayers> Players = new List<OtherPlayers>();
+    public Vector2 TargetPosition;
+    public Vector2 LastTargetPosition;
     public Position Position;
     public string ID;
 
 
     public OtherPlayers(Position position,string ID)
     {
+        TargetPosition = position.WorldPosition;
         Position = position;
         this.ID = ID;
         Players.Add(this);
     }
 
-    public void HandlePlayer()
+
+    private Vector2 velocity; // Keep track of velocity for SmoothDamp
+
+    public void HandlePlayer( )
     {
         Draw();
+        // Smoothly interpolate with easing
+        Position.WorldPosition = SmoothDamp(Position.WorldPosition, TargetPosition, ref velocity, 0.1f, Raylib.GetFrameTime());
     }
+    private Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 velocity, float smoothTime, float deltaTime)
+    {
+        // Avoid division by zero
+        smoothTime = Math.Max(0.0001f, smoothTime);
+
+        // Calculate the damping rate
+        float omega = 2f / smoothTime;
+        float x = omega * deltaTime;
+        float exp = 1f / (1f + x + 0.48f * x * x + 0.235f * x * x * x);
+
+        // Calculate change
+        Vector2 change = current - target;
+        
+        Vector2 temp = (velocity + omega * change) * deltaTime;
+        velocity = (velocity - omega * temp) * exp;
+       
+
+
+        // Final position
+        return target + (change + temp) * exp;
+    }
+
 
     private void Draw()
     {

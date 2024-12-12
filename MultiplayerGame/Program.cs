@@ -18,7 +18,7 @@ class Program
         Player player = new Player(new Position(200,200));
 
         
-        float t = 0;
+        int t = 0;
         while (!Raylib.WindowShouldClose())
         {
             Position.ReDoPositions();
@@ -27,7 +27,10 @@ class Program
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.Blue);
             player.HandlePlayer();
-            _ = player.GetData();
+      
+            _ = player.GetData(t);
+            t++;
+            
             
             Raylib.DrawRectangle((int)boxPos.ScreenPosition.X,(int)boxPos.ScreenPosition.Y,100,100,Color.Brown);
             
